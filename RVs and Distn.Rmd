@@ -1,0 +1,495 @@
+---
+title: "Distributions"
+author: "MSSP Bootcamp"
+date: "2022-08-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Random Variables & Distributions
+
+
+### OUtline  
+  + Random variables   
+    - Define RV wrt probability – discrete and continuous cases  
+  + Distributions (univariate first)   
+    - CDF, pdf, quantil function (inverse CDF)   
+  + Examine some specific  univariate distributions   
+    - Discrete: uniform, Bernoulli, binomial, geometric, Poisson   
+    - Continuous: uniform, Normal (Gaussian), exponential, gamma, beta, t & Cauchy   
+  + Bivariate distributions: discrete, continuous    
+    - Independent random variables   
+    - Marginal distributions    
+      Conditional distributions    
+  + Multivariate distributions   
+    - Joint Distributions   
+    - Mixed Distributions   
+    - Marginal Distributions   
+    - Independent Random Variables   
+    - Conditional Distributions    
+  + Simple examples    
+    - Multinomial   
+    - Multivariate Normal   
+ 
+  
+  
+## Probability: a very quick review {.smaller}
+
+
+### Sample space  
+
+A *sample space* $\Omega$ is the set of possible outcomes ($\omega_i$) of an experiment.  Subsets of $\Omega$ are called *events*, $A_i$.
+
+
+Subsets of outcomes form an event space $F$ whose elements $A_i$ may be 
+comprised of one outcome, multiple outcomes, or no outcome at all. 
+
+### Event space   
+
+$F$ must meet these simple criteria to provide a basis for probability mapping,
+
+1.  $\Omega$ and the empty set $\emptyset$ are members of $F$.
+2.  $A \in F$ implies $A^c = {\omega \in \Omega: \omega \notin A} \in F$
+3.  $A_1, A_2, ... \in F$ implies $A = \bigcup_{i=1}^{\infty} A_i \in F$
+
+
+### Probability space
+
+
+Probability is defined with this triple: $(\Omega, \mathcal{F}, \mathcal{P})$, 
+
+
+ That is,  
+
+
+A probability space,  consists of three parts,
+
+1. a sample space, $\Omega$, the set of all possible outcomes
+2. A set of events, $\it{F}$, where each event is a set containing zero or more outcomes
+3. A function $\bf{P}$, a function that maps every event into the real numbers in the closed interval [0,1].
+
+
+
+$\bf{P}$ is a probability function if it satisfies three axioms
+
+1. $\bf{P}(A) \geq 0$ for every A
+2. $\bf{P}(\Omega) = 1$
+3. if $\bf{A_1, A_2, ...}$ are disjoint then $\bf{P}\left ( \bigcup_{i=1}^{\infty} A_i\right ) = \sum_{i=i}^{\infty}\bf{P}(A_i)$
+
+
+This gives us the familiar rules of probability which are theorems that follow from the axioms
+
+$P(\emptyset) = 0$
+
+$P(A^c) = 1 -  p(A)$
+
+$P(A \cup B) = P(A) - P(B) - P(A \cap B)$
+
+and so on.
+
+
+
+## Calculating probability
+
+The problems in the previous section provided simple examples of three common 
+approaches to calculating probability.
+
+### Indifference
+
+This is the classic approach.  List out the sample space.  Assume that you have
+no reason to think that one outcome is more probable than any of the others.
+So they are all equally probable. You calculate probability by counting out the
+space for the events of interest.  See Grimaldi, Chapter 1.
+
+
+### Frequency
+
+This is an approach that we will examine more closely in a few days. You run the experiment many times. All you know about the probabilities of events is the 
+accumulating evidence of multiple trials.  You feel certain that the probabilities converge ...
+
+
+### Belief
+
+This is the part that you may have skipped over in previous courses. 
+You buy the idea that beliefs about how frequently an event will occur 
+could somehow be expressed as probability. You are flipping a coin.
+You've flipped 10 heads.  You have a STRONG feeling that the next flip 
+will be a tail. Do you really want to call that probability?!!!  Probably not.
+
+
+But there are situations where your beliefs and your actions are arguably aligned --  Betting (or investing if you're squeamish about betting).
+
+You offer me the chance to bet $100 on a binary outcome -- A or B.
+You bet on A.  If A happens, you'll win $300.  
+
+<div align="center">
+
+winnings = odds-against * bet
+
+
+So the odds against A must be 3-to-1. 
+</div>
+
+Let's assume
+ that the odds are "fair."  That is to say that the odds are a function of the relative probabilities of the events
+
+
+
+Odds-against = $\frac{3}{1} = \frac{p(B)}{p(A)} = \frac{number\; of\; ways\; to\; lose}{number\; of \;ways \;to \;win}$
+
+
+Odds express relative probabilities.  $P(A) = 0.25$
+
+
+### Surprise
+
+Information theory (Shannon, 1948) provides a mathematical foundation for the quantification, compression and transmission of information.  Shannon defined a core set of concepts concerning entropy --  a measure for information or uncertainty.
+
+Information theory links the random events with communication by measuring the number of bits required to communicate a random outcome. A bit is is a binary random variable.
+
+Surprisal ($s$) quantifies the uncertainy in a random variable $X$ taking a value $x$ based on it's probability of occurence $p(x)$.
+
+ $s(x) = Log_2\frac{1}{p(x)} = -log_2p(x)$
+
+
+Of course, surprisal is inversely related to probability.
+
+Take, for example, an 8-horse race where the horses ${x_1, ...,x_8}$  have   
+the  probabilities $1/2, 1/4, 1/8, 1/16, 1/64, 1/64, 1/64, 1/64$ of winning.
+
+The surprisal of the first hose winning is 1 and the surprisal of one of the last four horses winning is 6.
+
+
+```{r echo=FALSE}
+ p <-  c(1/2, 1/4, 1/8, 1/16, 1/64, 1/64, 1/64, 1/64)
+s <- -log2(p)
+
+plot(p,s, main = "Surprisal vs. Probability")
+
+
+```
+
+## Conditional Probability
+
+The conditional probability of A given B is
+
+\(P(A|B) = \frac{P(A \cap B)}{P(B)}\)
+
+Note that if \(A\) and \(B\) are disjoint, \(P(A|B) = \frac{0}{P(B)} = 0\)
+
+If \(A \subset B\) then \(P(A|B) = \frac{P(A)}{P(B)} < 1\).  In other words, B is necessary for A.
+
+If \(B \subset A\) then \(P(A|B) = \frac{P(B)}{P(B)} = 1\).  In other words, B implies A.
+
+
+Also note that conditioning on B, makes B the sample space of a new probability space:
+
+\((B, \{A \cap B, \forall A \in B \}, P(\cdot|B))\)
+
+
+
+## Independence
+
+Events \(A\) and \(B\) in sample space \(\Omega\) are independent if
+
+\(P(A \cap B) = P(A)P(B) \).
+
+Given this definition, it follows that if \(A\) and \(B\)
+are independent, <br>
+
+\(P(A|B) = P(A)\) and \(P(B|A) = P(B)\).
+
+
+With more than two events, mutual independence between \(k\) events <br>
+
+\(A = \{A_1, A_2, \cdots , A_k\}\)  are mutually independint if for every subset of \(j)\) events in \(A\), \(j = 2, \cdots ,k), <br>
+P(A_{i_1} \cap A_{i_2} \cap, \cdots , A_{i_3}) = 
+
+
+
+
+
+
+
+## Bayes' Rule
+
+Begin with a disjoint decomposition of \(\Omega\):
+
+![](images/slide4a.png)
+
+and superimpose a set \(B\),  \(B \in \Omega\).
+
+
+
+![](images/slide5a.png)
+
+With a bit a algebra ...
+
+$$
+\begin{align*}
+ P(A \cap B) &= P(A|B)P(B)\\ 
+ &= P(B|A)P(A)
+\end{align*}$$
+
+$$\text{therefore}$$  
+
+$$P(A|B) = \frac{P(B|A)P(A)}{P(B)}$$ 
+
+Now back to the drawing where 
+for the events \(A_1, \cdots ,A_6\) in the disjoint decomposition of \(\Omega\),
+
+\(P(B) = \sum_{i=1}^6 P(B \cap A_i) = \sum_{i=1}^6 P(B|A_i)P(A_i)\)
+
+And so,
+
+
+\(P(A_i|B) = \frac{P(B|A_i)P(A_i)}{\sum_{i=1}^6 P(B|A_i)P(A_i)}\)
+
+
+
+## Random Variables and Distributions
+
+
+**Random Variables** are real valued functions that are defined over the elements of a sample space.  
+<div style="margin-left:45px;">
+$(X: \Omega \rightarrow \mathbb{R})$
+The function, in this case X,  assigns a real number $X(\omega)$ to to each outcome in \(\Omega\).  
+When you write "X" in an equation where X is a random variable, you are writing the name of a function.
+<br>
+
+"Random Variable" is a good term given how Random Variables are used.  But the term tends to obscure the underlying meaning of Random Variables as a mapping.
+</div>
+<br><br>
+The **Cumulative Distribution Function (CDF)** of a random variable X is the function \(F_X: \mathbb{R} \rightarrow [0,1]\) such that \(F_X(x) = P(X \leq x)\).
+<br>
+<br>
+<div style="margin-left:45px;">
+The CDF completely determines the distribution of a random variable and has the following properties:
+<br>
+<div style="margin-left:55px;">
+F is non-decreasing: 
+<div style="margin-left:65px;">
+if \(x_1 < x_2\), then \(F(x_1) \leq F(x_2)\). 
+</div>
+F is normalized:
+<br>
+<div style="margin-left:65px;">
+$\displaystyle\lim_{x \to -\infty} F(x) = 0$, and
+<br>
+$\displaystyle\lim_{x \to \infty} F(x) = 1$
+</div>
+\(F\) is right-continuous:  
+<div style="margin-left:65px;">
+$F(x) = F(x^+)$ for all \(x)\) where 
+$F(x^+) = \displaystyle\lim_{{y \to x}_{Y>x}}F(y)$
+
+</div>
+</div>
+</div>
+
+
+Random Variabls may be **discrete** or **continuous**.
+
+
+A **Discrete Random Variable** takes on countably many values.
+<br><br>
+The **probability mass function** for discrete random variable \(X\) is
+<br>
+\(f_X(x) = P(X=x)\).
+
+
+A **Continuous Random Variable** is a random variable whose cumulative distribution function is continuous everywhere.
+<div style="margin-left:65px;">
+That is, 
+a random variable X is continuous if there is a function \(f_X\) such that 
+<div style="margin-left:65px;">
+<br>
+\(f_X(x) > 0\) for all x, and
+\(\int_{-\infty}^{\infty}f_X(x)dx = 1\)
+<br><br>
+$f_X$ is the **probability density function (pdf)** of random variable X,
+<br>
+\(P(a< x < b) = \int_a^b f_x(x)dx\)
+for every \(a<b\),
+<br>
+
+\(F_X(x) = \int_{-\infty}^x f_X(t)dt\), and
+<br>
+\(f_X(s) = F_X^{'}(x)\)
+</div>
+</div>
+
+The **Inverse CDF (Quantile function)**
+
+$F^{-1}(q) = \text{inf }(x: F(x)>q)$ for \(q \in [0,1]\)
+<br>
+\(F^{-1}\) is the smallest \(x\) s.t. \(F(x) \geq p\) 
+is the p-quantile of \(X\) or the 100*p percentile of \(X\).
+<br>
+<div style="margin-left:45px;">
+<br>
+If F is strictly increasing and continuous,
+\(F^-1(q)\) is the unique real number \(x\) such that \(F(x) = q\)
+</div>
+
+
+## Special Distributions
+
+
+One of the ways that the basic structure of sample spaces and distributions is made accessible and applicable is standard statistical distributions. 
+Distributions  model a vast array of archtypical random phenomena.  
+
+Many of these distributions  may already familiar to you. Using R, you gain get the operational capability to work with distributions using standardized functions you will use in data analysis.   
+
+Generally, operational capability includes: 
+<div style="margin-left:45px;">
+</ol>
+<li>Identify the process, logic, and assumptions that underly the distribution   </li>
+
+<li>Use programming tools that provide computational access to the distribution  </li>
+
+<li>Explore how the distribution is related to other common distributions<li>
+
+</ol>
+</div>
+
+There are many more statistical distributions than any course can cover. See this [Wikipedia List of probability distributions](https://en.wikipedia.org/wiki/List_of_probability_distributions) or this [Compendium of Common Probability Distributions](http://www.ub.edu/stat/docencia/Diplomatura/Compendium.pdf). What is critical is to have command of the concepts and tools that can be used to understand and work with any distribution.
+
+This list of [distributions supported in R](https://cran.r-project.org/web/views/Distributions.html) includes both computational and analytic resources for a huge array of statisticsl distribtutions.
+
+
+
+Distributions supported by R are accessed through four functions which are based on a root name and four preface characters.Root names include "norm" for normal, "binom"for binomial, and so on.  The standard prefixes are "p" for CDF, "q" for inverse CDF or quantil, "d" for probability mass function or pdf, and r for random samples.
+
+For example, the root name for the normal distribution is "norm".
+
+
+
+When prefixed by one of the letters, the results  tk tk tk
+
+p for "probability", the cumulative distribution function (CDF)
+for the standard normal, dnorm.
+
+```{r fig.width=5}
+curve(pnorm,from = -4,to = 4)
+```
+
+
+q for "quantile", the inverse CDF 
+for the standard normal
+```{r fig.width=5}
+curve(qnorm)
+
+```
+
+d for "density", the density function or probability mass function(pf or pdf)
+```{r fig.width=5}
+curve(dnorm,from = -4,to = 4)
+```
+
+
+r for "random", a random variable having the specified distribution.
+```{r fig.width=5}
+hist(rnorm(100))
+```
+
+ 
+### Some important discrete distributions
+
+
+<ol>
+
+<li> Bernoulli and Binomial </li>
+
+
+<li>  Hypergeometric </li>
+
+<li> Poisson  </li>
+
+<li> Negative Binomial  and Geometric</li>
+
+</ol>
+
+
+
+
+
+##Bivariate Distribtions
+
+### Joint Distribution
+
+For **discrete bivariate** random variables \(X\) and \(Y\), the **joint mass function** by f(x,y) = P(X=x and Y=y).
+
+In the **Continuous bivariate** case: we call \(f(x,y)\) a pdf for the random variables  (X,Y) if 
+<div style="margin-left:65px;">
+\(f(x,y) \geq 0\) for all \((x,y)\)
+
+
+\( \int_{-\infty}^\infty \int_{-\infty}^\infty) f(x,y)dx dy = 1\)
+
+for any set \(A \subset \mathbb{R}x\mathbb{R}, P((X,Y) \in A)\) = \int \int_A f(x,y)dx dy
+
+</div>
+
+### Marginal Distribution
+
+If \((X,Y)\) have joint distribution with mass function \(f_{X,Y}\), then **marginal mass function for** \(X)\) is 
+<br>
+<div style="margin-left:65px;">
+\(f_k X(x) = P(X=x) = \displaystyle\sum_y P(X=x, Y=y) = \sum_y f(x,y) \) 
+<br>
+</div>
+Similarly, the *marginal mas function for Y* is defined by 
+<br>
+<div style="margin-left:65px;">
+\(f_Y(y)) = P(Y=y) = \sum_x P(X=x, Y=y) = \sum_x f(x,y) \)
+</div>
+
+For **continuous distributions** the marginal densities are<br>
+
+\(f_X(x) = \int f(x,y)dy\) and \(f_Y(y) = \int f(x,y) dx\).
+
+
+### Independent Random Variables
+
+Random variables X and Y are independent if 
+for every A and B,
+<div style="margin-left:65px;">
+\(P(X \in A, Y \in B) = P(X \in A)(P(Y \in B))\)
+
+</div>
+
+
+### Conditional Distributions
+
+**If X and Y are discrete**, then we can compute the conditonal distribution of X given observations of
+\(Y = y\).
+
+Using Bayes' Rule:
+<div style="margin-left:65px;">
+$P(X=x|Y=y) = \frac{X=x,Y=y}{P(Y=y)}$
+
+<br>
+
+$f_{X|Y}(x|y) = \frac{f_{X,Y} (x,y)}{f_Y(y)}$ if \(f_Y(y)>0\)
+
+</div>
+For **continuous random variables**, the **conditional proabiltiy density function** is
+<br>
+<div style="margin-left:65px;">
+
+$f_{X|Y}(x|y)=\frac{f_{x,Y}(x,y)}{f_Y(y)}$, \(f_Y(y) > 0)
+
+<br> 
+so
+$P(X \in A| Y=y) = \int_A f_{X|Y}(x|y)dx
+
+
+</div>
+
+
+
+
